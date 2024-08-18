@@ -1,17 +1,17 @@
 #include <Arduino.h>
 #include "crsf.h"
 
-#define RXD2 16
-#define TXD2 17
+#define RXD2 20 // 16
+#define TXD2 21 // 17
 #define SBUS_BUFFER_SIZE 25
 uint8_t _rcs_buf[25] {};
 uint16_t _raw_rc_values[RC_INPUT_MAX_CHANNELS] {};
 uint16_t _raw_rc_count{};
 
-int aileronsPin = 12;
-int elevatorPin = 13;
-int throttlePin = 14;
-int rudderPin = 15;
+int aileronsPin = 2;
+int elevatorPin = 3;
+int throttlePin = 4;
+int rudderPin = 5;
 
 int aileronsPWMChannel = 1;
 int elevatorPWMChannel = 2;
@@ -37,7 +37,7 @@ void setup() {
   // Note the format for setting a serial port is as follows: Serial2.begin(baud-rate, protocol, RX pin, TX pin);
   Serial.begin(460800);
   //Serial1.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  Serial2.begin(420000, SERIAL_8N1, RXD2, TXD2);
+  Serial1.begin(420000, SERIAL_8N1, RXD2, TXD2);
   Serial.println("Serial Txd is on pin: "+String(TX));
   Serial.println("Serial Rxd is on pin: "+String(RX));
   
@@ -54,8 +54,8 @@ void setup() {
 
 void loop() { //Choose Serial1 or Serial2 as required
   // Serial.println("looping");
-  while (Serial2.available()) {
-    size_t numBytesRead = Serial2.readBytes(_rcs_buf, SBUS_BUFFER_SIZE);
+  while (Serial1.available()) {
+    size_t numBytesRead = Serial1.readBytes(_rcs_buf, SBUS_BUFFER_SIZE);
     if(numBytesRead > 0)
     {
       crsf_parse(&_rcs_buf[0], SBUS_BUFFER_SIZE, &_raw_rc_values[0], &_raw_rc_count, RC_INPUT_MAX_CHANNELS );
