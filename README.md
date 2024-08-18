@@ -1,5 +1,8 @@
 # CRSF PWM bridge
 
+NOTE: This fork is set for use with XAIO ESP32-C3 or
+other C3 board can be used. ESP32 and S series need code changes to work.
+
 This code will read serial communications from a ELRS or crossfire receiver and parse/demux the channel data and then pipe
 out the PWM control signals (via pin 12 and 13 with the code as is).
 
