@@ -1,8 +1,9 @@
 #include <Arduino.h>
 #include "crsf.h"
 
-#define RXD2 20 // 16
-#define TXD2 21 // 17
+// set for XAIO C3
+#define RXD2 20 // 16 esp32
+#define TXD2 21 // 17 esp32
 #define SBUS_BUFFER_SIZE 25
 uint8_t _rcs_buf[25] {};
 uint16_t _raw_rc_values[RC_INPUT_MAX_CHANNELS] {};
@@ -18,6 +19,9 @@ int elevatorPWMChannel = 2;
 int throttlePWMChannel = 3;
 int rudderPWMChannel = 4;
 
+
+int curTicks = 0;
+int curCnt = 0;
 
 void SetServoPos(float percent, int pwmChannel)
 {
@@ -35,11 +39,14 @@ void SetServoPos(float percent, int pwmChannel)
 
 void setup() {
   // Note the format for setting a serial port is as follows: Serial2.begin(baud-rate, protocol, RX pin, TX pin);
-  Serial.begin(460800);
-  //Serial1.begin(9600, SERIAL_8N1, RXD2, TXD2);
-  Serial1.begin(420000, SERIAL_8N1, RXD2, TXD2);
-  Serial.println("Serial Txd is on pin: "+String(TX));
-  Serial.println("Serial Rxd is on pin: "+String(RX));
+  // Serial.begin(460800);  // production output speed if needed
+  Serial.begin(115200); // Much slower than CRSF don't output in production!
+  // ESP32 uses Serial2
+  // ESP32 C3 uses Serial0
+  // needs some conditional compile stuff for other boards
+  Serial0.begin(420000, SERIAL_8N1, RXD2, TXD2);
+  // Serial.println("Serial Txd is on pin: "+String(TX));
+  // Serial.println("Serial Rxd is on pin: "+String(RX));
   
   ledcSetup(aileronsPWMChannel,50,16);
   ledcSetup(elevatorPWMChannel,50,16);
@@ -53,9 +60,18 @@ void setup() {
 }
 
 void loop() { //Choose Serial1 or Serial2 as required
-  // Serial.println("looping");
-  while (Serial1.available()) {
-    size_t numBytesRead = Serial1.readBytes(_rcs_buf, SBUS_BUFFER_SIZE);
+  // verify we are looping, slowly!
+  // curTicks += 1;
+  // if(curTicks > 100000) {
+  //   curTicks = 0;
+  //   curCnt += 1;
+  //   Serial.print("looping - ");
+  //   Serial.println(curCnt);
+  // }
+
+  while (Serial0.available()) {
+    // Serial.print("Serial data available");
+    size_t numBytesRead = Serial0.readBytes(_rcs_buf, SBUS_BUFFER_SIZE);
     if(numBytesRead > 0)
     {
       crsf_parse(&_rcs_buf[0], SBUS_BUFFER_SIZE, &_raw_rc_values[0], &_raw_rc_count, RC_INPUT_MAX_CHANNELS );
